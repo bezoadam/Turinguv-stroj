@@ -51,15 +51,19 @@ removeLast([X|Xs], [X|WithoutLast]) :-
 
 getActualSymbol([_, Symbol|_], Symbol).
 
-getActualState([H|T],State) :-
+% funkce vrati nasledujici symbol
+getSymbol([], ' ').
+getSymbol([H|_], H).
+
+getActualStateAndSymbol([H|T], State, Symbol) :-
 	char_type(H, upper),
 		(
+			getSymbol(T, Symbol),
 			State = H
 		)
 	;
-	getActualState(T, State).
+	getActualStateAndSymbol(T, State, Symbol).
 
-getRule([],_,_,_,_).
 getRule([H|T], State, Symbol, NextState, Action) :-
 	[StateRule, SymbolRule, NewState, NewSymbol] = H,
 	(
@@ -74,16 +78,27 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 %% shiftLeft(Tape, State, Symbol, Action, NextState, NewTape) :-
 
 %% .
-%% shiftRight(Tape,State, Symbol, Action, NextState, NewTape) :-
-
-%% .
+shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
+	(
+		H1 == State,
+		%% writeln([H1,H2|T]),
+		append([Symbol, NextState], T, NewTape)
+		;
+		%% writeln("somtu"),
+		shiftRight([H2|T], State, Symbol, Action, NextState, R),
+		NewTape = [H|R]
+	)
+.
 
 writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(	
 		H1 == State,
-		append([NextState,Action], T, NewTape)
-	;
-		writeSymbol(T, State, Symbol, Action, NextState, R),
+		append([NextState,Action], T, NewTapeTmp),
+		append(NewTapeTmp, [H2|T], NewTape),
+		writeln(NewTape)
+		;
+		writeSymbol([H2|T], State, Symbol, Action, NextState, R),
+
 		NewTape = [H|R]
 	).
 
@@ -92,23 +107,26 @@ getNextAction(Action, Operation) :-
 	%% 	Operation =	shiftLeft
 	%% ) 
 	%% ;
-	%% Action == 'R' (
-	%% 	Operation =	shiftRight
-	%% )
-	%% ;
+	Action == 'R',
+	(
+		Operation =	shiftRight
+	)
+	;
 	Operation = writeSymbol
-
 .
 
-runTS(Tape,Rules,Output) :-
-	getActualState(Tape, State), getActualSymbol(Tape, Symbol),
+runTS(_,_,_,0).
+runTS(Tape,Rules,Output, Cycles) :-
+	getActualStateAndSymbol(Tape, State, Symbol),
 	(
 		State == 'F',!
 		;
 		getRule(Rules, State, Symbol, NextState, Action),
 		getNextAction(Action, Operation),
 		call(Operation, Tape, State, Symbol, Action, NextState, NewTape),
-		runTS(NewTape, Rules, R),
+		writeln(NewTape),
+		C is Cycles - 1,
+		runTS(NewTape, Rules, R, C),
 		Output = [NewTape|R]
 	).
 
@@ -124,8 +142,8 @@ start :-
 		%% write_lines2(RulesFlattened),
 		%% write_lines2(Tape),
 
-		writeln(Tape),
-		runTS(Tape, RulesFlattened, Output),
+		%% writeln(Tape),
+		runTS(Tape, RulesFlattened, Output, 4),
 		writeln(Output),
 
 		halt.
