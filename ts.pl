@@ -71,13 +71,45 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 		getRule(T,State,Symbol,NextState,Action)
 	).
 
+%% shiftLeft(Tape, State, Symbol, Action, NextState, NewTape) :-
+
+%% .
+%% shiftRight(Tape,State, Symbol, Action, NextState, NewTape) :-
+
+%% .
+
+writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
+	(	
+		H1 == State,
+		append([NextState,Action], T, NewTape)
+	;
+		writeSymbol(T, State, Symbol, Action, NextState, R),
+		NewTape = [H|R]
+	).
+
+getNextAction(Action, Operation) :-
+	%% Action == 'L' (
+	%% 	Operation =	shiftLeft
+	%% ) 
+	%% ;
+	%% Action == 'R' (
+	%% 	Operation =	shiftRight
+	%% )
+	%% ;
+	Operation = writeSymbol
+
+.
+
 runTS(Tape,Rules,Output) :-
 	getActualState(Tape, State), getActualSymbol(Tape, Symbol),
 	(
 		State == 'F',!
 		;
 		getRule(Rules, State, Symbol, NextState, Action),
-		Output = NextState
+		getNextAction(Action, Operation),
+		call(Operation, Tape, State, Symbol, Action, NextState, NewTape),
+		runTS(NewTape, Rules, R),
+		Output = [NewTape|R]
 	).
 
 start :-
@@ -89,9 +121,10 @@ start :-
 		flatten(InputTape, X),
 		append(['S'],X,Tape),
 		maplist(flatten, Rules, RulesFlattened),
-		write_lines2(RulesFlattened),
-		write_lines2(Tape),
+		%% write_lines2(RulesFlattened),
+		%% write_lines2(Tape),
 
+		writeln(Tape),
 		runTS(Tape, RulesFlattened, Output),
 		writeln(Output),
 
