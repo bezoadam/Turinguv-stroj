@@ -59,10 +59,25 @@ getActualState([H|T],State) :-
 	;
 	getActualState(T, State).
 
+getRule([],_,_,_,_).
+getRule([H|T], State, Symbol, NextState, Action) :-
+	[StateRule, SymbolRule, NewState, NewSymbol] = H,
+	(
+		StateRule == State,
+		SymbolRule == Symbol,
+		NextState = NewState,
+		Action = NewSymbol
+		;
+		getRule(T,State,Symbol,NextState,Action)
+	).
+
 runTS(Tape,Rules,Output) :-
 	getActualState(Tape, State), getActualSymbol(Tape, Symbol),
 	(
-		Output = State
+		State == 'F',!
+		;
+		getRule(Rules, State, Symbol, NextState, Action),
+		Output = NextState
 	).
 
 start :-
@@ -77,7 +92,7 @@ start :-
 		write_lines2(RulesFlattened),
 		write_lines2(Tape),
 
-		runTS(Tape, Rules, Output),
+		runTS(Tape, RulesFlattened, Output),
 		writeln(Output),
 
 		halt.
