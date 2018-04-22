@@ -1,17 +1,9 @@
 /** FLP 2018
 Program: Touringov stroj
 autor: Adam Bezak, xbezak01@stud.fit.vutbr.cz
-
-preklad: swipl -q -g start -o flp16-log -c input2.pl
 */
 
-
-
-
-
-
-
-
+%%%%%%%%%%%%%%% Pomocne funkcie z cviceni %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Reads line from stdin, terminates on LF or EOF.
 read_line(L,C) :-
@@ -43,24 +35,39 @@ split_line([H|T], [[H|G]|S1]) :- split_line(T,[G|S1]). % G je prvni seznam ze se
 split_lines([],[]).
 split_lines([L|Ls],[H|T]) :- split_lines(Ls,T), split_line(L,H).
 
+%%%%%%%%%%%%%%% Moje funkcie %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% vypise list charov ako string
+writeListInStringFormat([]) :- write('\n').
+writeListInStringFormat([H|T]) :- write(H),writeListInStringFormat(T).
+
+% vypise list listov charov ako viacero stringov pod seba
+writeListsInStringFormat([]).
+writeListsInStringFormat([H|T]) :- writeListInStringFormat(H),writeListsInStringFormat(T).
+
+removeLast([_], []).
+removeLast([X|Xs], [X|WithoutLast]) :- 
+    removeLast(Xs, WithoutLast).
+
+
+
+runTS(Paska,Pravidla,Vystup) :-
 
 
 start :-
 		prompt(_, ''),
 		read_lines(LL),
 		split_lines(LL,S),
-		write(S),
+		last(S,VstupnaPaskaZoSuboru),
+		removeLast(S, Pravidla),
+		flatten(VstupnaPaskaZoSuboru, X),
+		append(['S'],X,VstupnaPaska),
+		maplist(flatten, Pravidla, Pravidla2),
+		write_lines2(Pravidla2),
+		write_lines2(VstupnaPaska),
+
+
 		halt.
-
-
-%"Compilation":
-%	 swipl -q -g start -o jmeno -c input2.pl
-
-
-
-
-
 
 
 
