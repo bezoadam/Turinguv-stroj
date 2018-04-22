@@ -49,23 +49,36 @@ removeLast([_], []).
 removeLast([X|Xs], [X|WithoutLast]) :- 
     removeLast(Xs, WithoutLast).
 
+getActualSymbol([_, Symbol|_], Symbol).
 
+getActualState([H|T],State) :-
+	char_type(H, upper),
+		(
+			State = H
+		)
+	;
+	getActualState(T, State).
 
-runTS(Paska,Pravidla,Vystup) :-
-
+runTS(Tape,Rules,Output) :-
+	getActualState(Tape, State), getActualSymbol(Tape, Symbol),
+	(
+		Output = State
+	).
 
 start :-
 		prompt(_, ''),
 		read_lines(LL),
 		split_lines(LL,S),
-		last(S,VstupnaPaskaZoSuboru),
-		removeLast(S, Pravidla),
-		flatten(VstupnaPaskaZoSuboru, X),
-		append(['S'],X,VstupnaPaska),
-		maplist(flatten, Pravidla, Pravidla2),
-		write_lines2(Pravidla2),
-		write_lines2(VstupnaPaska),
+		last(S,InputTape),
+		removeLast(S, Rules),
+		flatten(InputTape, X),
+		append(['S'],X,Tape),
+		maplist(flatten, Rules, RulesFlattened),
+		write_lines2(RulesFlattened),
+		write_lines2(Tape),
 
+		runTS(Tape, Rules, Output),
+		writeln(Output),
 
 		halt.
 
