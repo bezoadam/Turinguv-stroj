@@ -1,0 +1,8 @@
+S a B a
+B a B R
+B b C b
+C b C L
+C a C L
+C b F d
+D a F a
+aaaab
