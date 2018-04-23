@@ -86,20 +86,26 @@ shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 		;
 		%% writeln("somtu"),
 		shiftRight([H2|T], State, Symbol, Action, NextState, R),
-		NewTape = [H|R]
+		NewTape = [H1|R]
 	)
 .
 
 writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(	
 		H1 == State,
-		append([NextState,Action], T, NewTapeTmp),
-		append(NewTapeTmp, [H2|T], NewTape),
+		%% writeln(NewTape),
+		%% writeln(State),
+		%% writeln(NextState),
+		%% writeln(Action),
+		NewTapeTmp = [NextState, Action],
+		append(NewTapeTmp, T, NewTape),
 		writeln(NewTape)
+               %% append([NextState], [Symbol], NewTmp),
+               %% append(NewTmp, MoreTape, NewTape)
 		;
 		writeSymbol([H2|T], State, Symbol, Action, NextState, R),
 
-		NewTape = [H|R]
+		NewTape = [H1|R]
 	).
 
 getNextAction(Action, Operation) :-
@@ -143,7 +149,7 @@ start :-
 		%% write_lines2(Tape),
 
 		%% writeln(Tape),
-		runTS(Tape, RulesFlattened, Output, 4),
+		runTS(Tape, RulesFlattened, Output, 8),
 		writeln(Output),
 
 		halt.
