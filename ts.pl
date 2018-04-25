@@ -84,18 +84,26 @@ shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 		writeln(NewTape)
 		;
 		%% writeln("somtu"),
-		shiftRight([H3|T], State, Symbol, Action, NextState, R),
-		NewTape = [H1,H2|R]
+		shiftRight([H2,H3|T], State, Symbol, Action, NextState, R),
+		NewTape = [H1|R]
 	)
 .
 
 shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(
 		H1 == State,
+		(
+			T == [],
+			(
+				writeln("konic pasky"),
+				NewTape = [NextState, H2],
+				fail
+			);
+			append([H2, NextState], T, NewTape)
+		)
 		%% writeln([H1,H2|T]),
-		append([Symbol, NextState], T, NewTape)
 		;
-		%% writeln("somtu"),
+		writeln("somtu"),
 		shiftRight([H2|T], State, Symbol, Action, NextState, R),
 		NewTape = [H1|R]
 	)
@@ -107,6 +115,7 @@ writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 		%% writeln(NewTape),
 		%% writeln(State),
 		%% writeln(NextState),
+		%% writeln(Action),
 		%% writeln(Action),
 		NewTapeTmp = [NextState, Action],
 		append(NewTapeTmp, T, NewTape)
@@ -120,7 +129,8 @@ writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	).
 
 getNextAction(Action, Operation) :-
-	Action == 'L', (
+	Action == 'L', 
+	(
 		Operation =	shiftLeft
 	) 
 	;
@@ -129,7 +139,10 @@ getNextAction(Action, Operation) :-
 		Operation =	shiftRight
 	)
 	;
-	Operation = writeSymbol
+	Action \= 'L', Action \= 'R',
+	(
+		Operation = writeSymbol
+	)
 .
 
 runTS(_,_,_,0).
@@ -160,7 +173,7 @@ start :-
 		%% write_lines2(Tape),
 
 		%% writeln(Tape),
-		runTS(Tape, RulesFlattened, Output, 15),
+		runTS(Tape, RulesFlattened, Output, 20),
 		writeln(Output),
 
 		halt.
