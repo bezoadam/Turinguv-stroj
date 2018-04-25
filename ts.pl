@@ -77,6 +77,7 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 
 shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 	(
+		writeln("shiftleft2"),
 		H2 == State,
 		%% writeln([H1,H2|T]),
 		writeln("shiftleft"),
@@ -84,7 +85,7 @@ shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 		writeln(NewTape)
 		;
 		%% writeln("somtu"),
-		shiftRight([H2,H3|T], State, Symbol, Action, NextState, R),
+		shiftLeft([H2,H3|T], State, Symbol, Action, NextState, R),
 		NewTape = [H1|R]
 	)
 .
@@ -173,7 +174,7 @@ start :-
 		%% write_lines2(Tape),
 
 		%% writeln(Tape),
-		runTS(Tape, RulesFlattened, Output, 20),
+		runTS(Tape, RulesFlattened, Output, 50),
 		writeln(Output),
 
 		halt.
