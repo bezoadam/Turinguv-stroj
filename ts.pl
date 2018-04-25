@@ -77,6 +77,10 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 
 shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 	(
+		H1 == State,
+		(
+			writeln("lavy okraj"), halt
+		);
 		writeln("shiftleft2"),
 		H2 == State,
 		%% writeln([H1,H2|T]),
