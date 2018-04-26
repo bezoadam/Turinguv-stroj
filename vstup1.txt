@@ -1,7 +1,7 @@
 S a B a
 B a B b
-B b B R
+B b B R 
 B c B a
+B c B b
 B c F c
-B c B a
 aaacaa

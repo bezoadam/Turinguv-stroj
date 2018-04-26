@@ -49,16 +49,14 @@ removeLast([_], []).
 removeLast([X|Xs], [X|WithoutLast]) :- 
     removeLast(Xs, WithoutLast).
 
-getActualSymbol([_, Symbol|_], Symbol).
-
-% funkce vrati nasledujici symbol
-getSymbol([], ' ').
-getSymbol([H|_], H).
+getFirst([], First) :- First = ' '.
+getFirst([H|_], First) :- First = H.
 
 getActualStateAndSymbol([H|T], State, Symbol) :-
+	char_type(H, alpha),
 	char_type(H, upper),
 		(
-			getSymbol(T, Symbol),
+			getFirst(T, Symbol),
 			State = H
 		)
 	;
@@ -73,22 +71,19 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 		Action = NewSymbol
 		;
 		getRule(T,State,Symbol,NextState,Action)
-	).
+	)
+.
 
 shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 	(
 		H1 == State,
 		(
-			writeln("lavy okraj"), halt
+			writeln("Konic pasky vlavo"),
+			fail
 		);
-		writeln("shiftleft2"),
 		H2 == State,
-		%% writeln([H1,H2|T]),
-		writeln("shiftleft"),
-		append([NextState, H1, H3], T, NewTape),
-		writeln(NewTape)
+		append([NextState, H1, H3], T, NewTape)
 		;
-		%% writeln("somtu"),
 		shiftLeft([H2,H3|T], State, Symbol, Action, NextState, R),
 		NewTape = [H1|R]
 	)
@@ -100,15 +95,12 @@ shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 		(
 			T == [],
 			(
-				writeln("konic pasky"),
 				NewTape = [NextState, H2],
 				fail
 			);
 			append([H2, NextState], T, NewTape)
 		)
-		%% writeln([H1,H2|T]),
 		;
-		writeln("somtu"),
 		shiftRight([H2|T], State, Symbol, Action, NextState, R),
 		NewTape = [H1|R]
 	)
@@ -117,16 +109,8 @@ shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(	
 		H1 == State,
-		%% writeln(NewTape),
-		%% writeln(State),
-		%% writeln(NextState),
-		%% writeln(Action),
-		%% writeln(Action),
 		NewTapeTmp = [NextState, Action],
 		append(NewTapeTmp, T, NewTape)
-		%% writeln(NewTape)
-               %% append([NextState], [Symbol], NewTmp),
-               %% append(NewTmp, MoreTape, NewTape)
 		;
 		writeSymbol([H2|T], State, Symbol, Action, NextState, R),
 
@@ -150,18 +134,16 @@ getNextAction(Action, Operation) :-
 	)
 .
 
-runTS(_,_,_,0).
-runTS(Tape,Rules,Output, Cycles) :-
+runTS(Tape,Rules,Output) :-
 	getActualStateAndSymbol(Tape, State, Symbol),
 	(
 		State == 'F',!
 		;
-		getRule(Rules, State, Symbol, NextState, Action),
+		getRule(Rules, State, Symbol, NextState, Action), 
 		getNextAction(Action, Operation),
 		call(Operation, Tape, State, Symbol, Action, NextState, NewTape),
 		writeln(NewTape),
-		C is Cycles - 1,
-		runTS(NewTape, Rules, R, C),
+		runTS(NewTape, Rules, R),
 		Output = [NewTape|R]
 	).
 
@@ -174,12 +156,8 @@ start :-
 		flatten(InputTape, X),
 		append(['S'],X,Tape),
 		maplist(flatten, Rules, RulesFlattened),
-		%% write_lines2(RulesFlattened),
-		%% write_lines2(Tape),
-
-		%% writeln(Tape),
-		runTS(Tape, RulesFlattened, Output, 50),
-		writeln(Output),
+		runTS(Tape, RulesFlattened, Output),
+		writeListsInStringFormat(Output),
 
 		halt.
 

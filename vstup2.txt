@@ -1,6 +1,8 @@
 S a B a
-B a B b
+B a B L
+B a B c
 B b B R
 B c B a
-B d F c
+B c F c
+B c B a
 aaacaa
