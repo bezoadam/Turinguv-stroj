@@ -23,8 +23,6 @@ read_lines(Ls) :-
 	  read_lines(LLs), Ls = [L|LLs]
 	).
 
-
-
 % rozdeli radek na podseznamy
 split_line([],[[]]) :- !.
 split_line([' '|T], [[]|S1]) :- !, split_line(T,S1).
@@ -45,13 +43,16 @@ writeListInStringFormat([H|T]) :- write(H),writeListInStringFormat(T).
 writeListsInStringFormat([]).
 writeListsInStringFormat([H|T]) :- writeListInStringFormat(H),writeListsInStringFormat(T).
 
+% odstrani posledny element z listu
 removeLast([_], []).
 removeLast([X|Xs], [X|WithoutLast]) :- 
     removeLast(Xs, WithoutLast).
 
+% vrati prvy element z listu
 getFirst([], First) :- First = ' '.
 getFirst([H|_], First) :- First = H.
 
+% vrati aktualny stav a symbol na zaklade konfiguracie TS
 getActualStateAndSymbol([H|T], State, Symbol) :-
 	char_type(H, alpha),
 	char_type(H, upper),
@@ -62,6 +63,7 @@ getActualStateAndSymbol([H|T], State, Symbol) :-
 	;
 	getActualStateAndSymbol(T, State, Symbol).
 
+% vrati nasledujuci stav na zaklade aktualneho stavu a symbolu
 getRule([H|T], State, Symbol, NextState, Action) :-
 	[StateRule, SymbolRule, NewState, NewSymbol] = H,
 	(
@@ -74,11 +76,11 @@ getRule([H|T], State, Symbol, NextState, Action) :-
 	)
 .
 
+% posun na paske vlavo
 shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 	(
-		H1 == State,
+		H1 == State, % ak sa nachadzame na zaciatku pasky tak fail
 		(
-			writeln("Konic pasky vlavo"),
 			fail
 		);
 		H2 == State,
@@ -89,11 +91,12 @@ shiftLeft([H1,H2,H3|T], State, Symbol, Action, NextState, NewTape) :-
 	)
 .
 
+% posun na paske vpravo
 shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(
 		H1 == State,
 		(
-			T == [],
+			T == [], % ak sa nachadzame na konci pasky tak fail
 			(
 				NewTape = [NextState, H2],
 				fail
@@ -106,6 +109,7 @@ shiftRight([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	)
 .
 
+% nahrada symbolu na paske
 writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 	(	
 		H1 == State,
@@ -117,6 +121,7 @@ writeSymbol([H1,H2|T], State, Symbol, Action, NextState, NewTape) :-
 		NewTape = [H1|R]
 	).
 
+% vrati odkaz na operaciu na zaklade aktualnej Action
 getNextAction(Action, Operation) :-
 	Action == 'L', 
 	(
@@ -134,6 +139,7 @@ getNextAction(Action, Operation) :-
 	)
 .
 
+% simulacia NTS
 runTS(Tape,Rules,Output) :-
 	getActualStateAndSymbol(Tape, State, Symbol),
 	(
@@ -142,7 +148,6 @@ runTS(Tape,Rules,Output) :-
 		getRule(Rules, State, Symbol, NextState, Action), 
 		getNextAction(Action, Operation),
 		call(Operation, Tape, State, Symbol, Action, NextState, NewTape),
-		writeln(NewTape),
 		runTS(NewTape, Rules, R),
 		Output = [NewTape|R]
 	).
@@ -156,77 +161,8 @@ start :-
 		flatten(InputTape, X),
 		append(['S'],X,Tape),
 		maplist(flatten, Rules, RulesFlattened),
+		writeListInStringFormat(Tape),
 		runTS(Tape, RulesFlattened, Output),
 		writeListsInStringFormat(Output),
 
 		halt.
-
-
-
-
-/* nacte zadany pocet radku */
-read_lines2([],0).
-read_lines2(Ls,N) :-
-	N > 0,
-	read_line(L,_),
-	N1 is N-1,
-	read_lines2(LLs, N1),
-	Ls = [L|LLs].
-
-
-/* vypise seznam radku (kazdy radek samostatne) */
-write_lines2([]).
-write_lines2([H|T]) :- writeln(H), write_lines2(T). %(writeln je "knihovni funkce")
-
-
-
-
-/* rozdeli radek na podseznamy -- pracuje od konce radku */
-%zalozit prvni (tzn. posledni) seznam:
-split_line2([],[[]]) :- !.
-%pridat novy seznam:
-split_line2([' '|T], [[]|S1]) :- !, split_line2(T,S1).
-%pridat novy seznam, uchovat oddelujici znak:
-split_line2([H|T], [[],[H]|S1]) :- (H=','; H=')'; H='('), !, split_line2(T,S1).
-%pridat znak do existujiciho seznamu:
-split_line2([H|T], [[H|G]|S1]) :- split_line2(T,[G|S1]).
-
-
-/* pro vsechny radky vstupu udela split_line2 */
-% vstupem je seznam radku (kazdy radek je seznam znaku)
-split_lines2([],[]).
-split_lines2([L|Ls],[H|T]) :- split_lines2(Ls,T), split_line2(L,H).
-
-
-
-
-
-/* nacte N radku vstupu, zpracuje, vypise */
-start2(N) :-
-		prompt(_, ''),
-		read_lines2(LL, N),
-		split_lines2(LL,S),
-		write_lines2(S).
-
-
-
-
-
-/** prevede retezec na seznam atomu */
-% pr.: string("12.35",S). S = ['1', '2', '.', '3', '5'].
-retezec([],[]).
-retezec([H|T],[C|CT]) :- atom_codes(C,[H]), retezec(T,CT).
-
-
-
-/** prevede seznam cislic na cislo */
-% pr.: cislo([1,2,'.',3,5],X). X = 12.35
-cislo(N,X) :- cislo(N,0,X).
-cislo([],F,F).
-cislo(['.'|T],F,X) :- !, cislo(T,F,X,10).
-cislo([H|T],F,X) :- FT is 10*F+H, cislo(T,FT,X).
-cislo([],F,F,_).
-cislo([H|T],F,X,P) :- FT is F+H/P, PT is P*10, cislo(T,FT,X,PT).
-
-% existuje knihovni predikat number_chars(?Number, ?CharList)
-% pr.: number_chars(12.35, ['1', '2', '.', '3', '5']).
