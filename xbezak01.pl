@@ -156,13 +156,21 @@ start :-
 		prompt(_, ''),
 		read_lines(LL),
 		split_lines(LL,S),
+		% Ziskanie vstupnej pasky
 		last(S,InputTape),
+		% Ziskanie pravidiel
 		removeLast(S, Rules),
+		% Prevod z [[]] na []
 		flatten(InputTape, X),
+		% Pociatocny stav na zaciatok pasky
 		append(['S'],X,Tape),
+		% Prevod z [[]] na []
 		maplist(flatten, Rules, RulesFlattened),
+		% Vypis pociatocej konfiguracie
 		writeListInStringFormat(Tape),
+		% Beh TS
 		runTS(Tape, RulesFlattened, Output),
+		% Vypis prechodu konfiguracii
 		writeListsInStringFormat(Output),
 
 		halt.

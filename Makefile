@@ -1,5 +1,7 @@
+#Touringov stroj
+#Adam Bezak, xbezak01@stud.fit.vutbr.cz
 PROGRAM=flp18-log
-SRC=ts.pl
+SRC=xbezak01.pl
 
 CC=swipl
 FLAGS=-q
