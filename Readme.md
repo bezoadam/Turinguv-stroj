@@ -1,10 +1,10 @@
-## Turingův stroj
+## Turingův stroj
 
 ### Autor: Adam Bezák xbezak01@stud.fit.vutbr.cz
 
 ### Program:
 
-##### Simulátor nedeterministického Turingova stroje
+##### Simulátor nedeterministického Turingova stroje
 
 Na vstupe program obdrží pravidla pre TS a vstupnú pásku. Výstup programu je postupnosť konfigurácií stroja.
 Výpočet stroja končí prechodom do koncového stavu alebo abnormánym zastavením.
@@ -23,3 +23,6 @@ Symboly `L`/`R` značia posun hlavy dolava/doprava. Na poslednom riadku vstupu j
 
 - vstup2.txt - Zacyklenie vstupu - Saaacaa -> Baaacaa -> Bcaacaa -> Baaacaa -> Bcaacaa ... 
  
+## 6/8
+Komentář učitele k hodnocení:
+Zlyhavaju aj deterministicke TS. Na nedeterministickych casto dochadza stack alebo to cykli.
